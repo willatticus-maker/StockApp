@@ -10,13 +10,17 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    @State private var networkClient = NetworkClient()
     @State private var apiData: String  = "p"
     var body: some View {
         HomePageView()
-        
-        VStack {
+            .task{
+                await networkClient.getStockDetail()
+
+       
+            }
         }
-    }
 }
 
 #Preview {
