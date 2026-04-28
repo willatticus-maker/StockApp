@@ -27,6 +27,7 @@ class NetworkClient {
                 print ("status code :\(responseConverted.statusCode )")
                 print (stockResponse)
                 
+                
             }
         } catch let error {
             print(error)

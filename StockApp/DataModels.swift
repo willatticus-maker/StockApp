@@ -39,21 +39,11 @@ struct DailyStockData: Codable {
 
 struct AlphaVantageResponse : Codable {
     let metaData: MetaData
-    let timeSeries: [Date: DailyStockData]
+    let timeSeries: [String: DailyStockData]
 
     enum CodingKeys: String, CodingKey {
         case metaData = "Meta Data"
         case timeSeries = "Time Series (Daily)"
-    }
-}
-
-class StockService {
-    func fetchStocks(){
-        let decoder = JSONDecoder()
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        decoder.dateDecodingStrategy = .formatted(formatter)
-        
     }
 }
 

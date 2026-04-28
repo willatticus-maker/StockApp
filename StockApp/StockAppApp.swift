@@ -14,6 +14,8 @@ struct StockAppApp: App {
         WindowGroup {
             ContentView()
                 .environment(networkClient)
+            
+            
 
         }
     }
