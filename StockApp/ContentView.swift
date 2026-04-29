@@ -12,7 +12,7 @@ import SwiftUI
 struct ContentView: View {
     
     @State private var networkClient = NetworkClient()
-    @State private var apiData: String  = "p"
+    @State private var apiData: String  = "26YEL3PQC5ZHFB1P"
     var body: some View {
         HomePageView()
             .task{

@@ -7,8 +7,9 @@
 import SwiftUI
 @Observable
 class NetworkClient {
+    
     func getStockDetail() async {
-        let urlStr = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=IBM&outputsize=compact&apikey=26YEL3PQC5ZHFB1P"
+        let urlStr = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&outputsize=compact&apikey=26YEL3PQC5ZHFB1P"
         let url: URL? = URL(string: urlStr)
         guard let urlUnwrapped = url else {
             return
@@ -26,7 +27,10 @@ class NetworkClient {
                 
                 print ("status code :\(responseConverted.statusCode )")
                 print (stockResponse)
-                
+                for DailyStockData in stockResponse.timeSeries {
+                    print (DailyStockData)
+                    
+                }
                 
             }
         } catch let error {
