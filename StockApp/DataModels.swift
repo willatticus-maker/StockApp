@@ -8,7 +8,7 @@
 import Foundation
 struct MetaData: Codable {
     let information: String
-    let symbol: String
+    let symbol: String  
     let lastRefreshed: String
     let outputSize: String
     let timeZone: String

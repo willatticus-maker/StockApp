@@ -1,6 +1,7 @@
 import SwiftUI
 
-struct HomePageView: View {
+struct HomeView: View {
+    let stockData: [StockPoint]
     var body: some View {
         ZStack {
             LinearGradient(
@@ -13,7 +14,7 @@ struct HomePageView: View {
             )
             .ignoresSafeArea()
             
-            VStack(alignment: .leading, spacing: 28) {
+            VStack( alignment: .leading, spacing: 28) {
                 
                 // Top section
                 VStack(alignment: .leading, spacing: 10) {
@@ -98,6 +99,4 @@ struct HomePageView: View {
     }
 }
 
-#Preview {
-    HomePageView()
-}
+
