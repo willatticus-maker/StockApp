@@ -40,13 +40,18 @@ struct DailyStockData: Codable {
 struct AlphaVantageResponse : Codable {
     let metaData: MetaData
     let timeSeries: [String: DailyStockData]
-
+    
     enum CodingKeys: String, CodingKey {
         case metaData = "Meta Data"
         case timeSeries = "Time Series (Daily)"
+        
+        
     }
+    var sortedTimeSeries: [(date: String, data: DailyStockData)] {
+        timeSeries.map { (date: $0.key, data: $0.value) }
+            .sorted { $0.date > $1.date }
+    }
+    
+    
+    
 }
-
-
-
-

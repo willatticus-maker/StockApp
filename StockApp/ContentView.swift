@@ -11,13 +11,16 @@ import SwiftUI
 
 struct ContentView: View {
     
-    @State private var networkClient = NetworkClient()
+    @Environment(NetworkClient.self) private var networkClient
     @State private var apiData: String  = "26YEL3PQC5ZHFB1P"
     var body: some View {
-        HomePageView()
+        ViewStockTest()
+            .onAppear {
+                print("appear")
+            }
             .task{
                 await networkClient.getStockDetail()
-                
+                print("done")
 
        
             }
@@ -26,4 +29,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environment(NetworkClient())
 }
