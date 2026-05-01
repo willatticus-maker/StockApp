@@ -6,7 +6,6 @@ struct PopularStocksView: View {
     
     var body: some View {
         ZStack {
-            // Your consistent background gradient
             LinearGradient(
                 colors: [Color(red: 0.05, green: 0.06, blue: 0.09), Color(red: 0.10, green: 0.12, blue: 0.18)],
                 startPoint: .topLeading, endPoint: .bottomTrailing
@@ -26,9 +25,16 @@ struct PopularStocksView: View {
                                     Text(symbol)
                                         .font(.headline)
                                         .foregroundColor(.white)
-                                    Text("Alpha Vantage Real-time")
-                                        .font(.caption)
-                                        .foregroundColor(.white.opacity(0.5))
+                                    
+                                    if network.stockResponse?.symbol == symbol {
+                                        Text("$\(network.stockResponse?.sortedTimeSeries.first?.data.close ?? "---")")
+                                            .font(.caption)
+                                            .foregroundColor(.cyan)
+                                    } else {
+                                        Text("Tap to load price")
+                                            .font(.caption)
+                                            .foregroundColor(.white.opacity(0.5))
+                                    }
                                 }
                                 Spacer()
                                 Image(systemName: "chart.line.uptrend.xyaxis")
@@ -37,9 +43,8 @@ struct PopularStocksView: View {
                             .padding()
                             .background(Color.white.opacity(0.05))
                             .cornerRadius(18)
-                            .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.white.opacity(0.1), lineWidth: 1))
                             .onTapGesture {
-                                Task { await network.getStockDetail() }
+                                Task { await network.getStockDetail(symbol: symbol) }
                             }
                         }
                     }
@@ -49,3 +54,4 @@ struct PopularStocksView: View {
         }
     }
 }
+            

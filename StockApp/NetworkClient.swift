@@ -7,8 +7,8 @@ class NetworkClient: ObservableObject {
          
     private(set) var stockResponse: AlphaVantageResponse?
     
-    func getStockDetail() async {
-        let urlStr = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&outputsize=compact&apikey=26YEL3PQC5ZHFB1P"
+    func getStockDetail(symbol:String) async {
+        let urlStr = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=\(symbol)&outputsize=compact&apikey=26YEL3PQC5ZHFB1P"
         
         guard let url = URL(string: urlStr) else { return }
         

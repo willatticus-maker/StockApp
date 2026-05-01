@@ -13,6 +13,6 @@ struct MainTabView: View {
             PortfolioView()
                 .tabItem { Label("Portfolio", systemImage: "briefcase") }
         }
-        .tint(.cyan) // Colors the icons to match your theme
+        .tint(.cyan)
     }
 }

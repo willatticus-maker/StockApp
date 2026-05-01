@@ -19,7 +19,7 @@ struct ContentView: View {
                 print("appear")
             }
             .task{
-                await networkClient.getStockDetail()
+                await networkClient.getStockDetail(symbol:"")
                 print("done")
 
        
