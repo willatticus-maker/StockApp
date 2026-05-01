@@ -1,10 +1,10 @@
 import Foundation
 import Combine
 
+@Observable
 class NetworkClient: ObservableObject {
     
-    @Published var stockPoints: [StockPoint] = []
-    
+         
     private(set) var stockResponse: AlphaVantageResponse?
     
     func getStockDetail() async {
@@ -18,7 +18,7 @@ class NetworkClient: ObservableObject {
             formatter.dateFormat = "yyyy-MM-dd"
             decoder.dateDecodingStrategy = .formatted(formatter)
             
-            let (data, response) = try await URLSession.shared.data(from: urlUnwrapped)
+            let (data, response) = try await URLSession.shared.data(from: url)
             
             if let responseConverted = response as? HTTPURLResponse {
                 stockResponse = try decoder.decode(AlphaVantageResponse.self, from: data)

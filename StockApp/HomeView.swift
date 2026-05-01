@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct HomeView: View {
-    let stockData: [StockPoint]
+    
     var body: some View {
         ZStack {
             LinearGradient(
