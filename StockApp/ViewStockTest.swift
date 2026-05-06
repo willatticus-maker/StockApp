@@ -20,8 +20,10 @@ struct ViewStockTest: View {
     
     var body: some View {
         VStack {
+            Rectangle()
+                .frame(width: 10,height: 10)
             if let response = networkClient.stockResponse {
-                let x = print("test")
+                Text ("evaluated")
                 ForEach(response.sortedTimeSeries, id :\.date){item in
                     HStack{
                         Text(item.data.high)
