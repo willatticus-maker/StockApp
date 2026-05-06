@@ -3,9 +3,21 @@ import Combine
 
 @Observable
 class NetworkClient: ObservableObject {
-    
+    private(set) var stockCache: [String: AlphaVantageResponse] = [:]
+       private(set) var isLoading = false
          
     private(set) var stockResponse: AlphaVantageResponse?
+    func getBatchStocks(symbols: [String]) async {
+            isLoading = true
+            for symbol in symbols {
+                if stockCache[symbol] != nil { continue }
+                
+                await getStockDetail(symbol: symbol)
+                
+                try? await Task.sleep(nanoseconds: 12_000_000_000)
+            }
+            isLoading = false
+        }
     
     func getStockDetail(symbol:String) async {
         let urlStr = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=\(symbol)&outputsize=compact&apikey=26YEL3PQC5ZHFB1P"
@@ -13,28 +25,16 @@ class NetworkClient: ObservableObject {
         guard let url = URL(string: urlStr) else { return }
         
         do {
-            let decoder = JSONDecoder()
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            decoder.dateDecodingStrategy = .formatted(formatter)
-            
-            let (data, response) = try await URLSession.shared.data(from: url)
-            
-            if let responseConverted = response as? HTTPURLResponse {
-                stockResponse = try decoder.decode(AlphaVantageResponse.self, from: data)
-                
-                print ("status code :\(responseConverted.statusCode )")
-                if let response = stockResponse {
-                    for item in response.sortedTimeSeries {
-                        print("date :\(item.date) Close: \(item.data.close)")
-                    }
+                    let (data, _) = try await URLSession.shared.data(from: url)
+                    let decoder = JSONDecoder()
+                    let response = try decoder.decode(AlphaVantageResponse.self, from: data)
                     
+                    // Save to our dictionary
+                    await MainActor.run {
+                        self.stockCache[symbol] = response
+                    }
+                } catch {
+                    print("Error fetching \(symbol): \(error)")
                 }
-                	
-                
             }
-        } catch let error {	
-            print(error)
         }
-    }
-}
