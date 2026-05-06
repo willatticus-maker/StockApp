@@ -5,6 +5,7 @@ struct PopularStocksView: View {
     let popularSymbols = ["AAPL", "TSLA", "NVDA", "MSFT", "GOOGL"]
     
     var body: some View {
+        
         ZStack {
             LinearGradient(
                 colors: [Color(red: 0.05, green: 0.06, blue: 0.09), Color(red: 0.10, green: 0.12, blue: 0.18)],
@@ -17,6 +18,7 @@ struct PopularStocksView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal)
                 
+                
                 ScrollView {
                     VStack(spacing: 16) {
                         ForEach(popularSymbols, id: \.self) { symbol in
@@ -25,26 +27,33 @@ struct PopularStocksView: View {
                                     Text(symbol)
                                         .font(.headline)
                                         .foregroundColor(.white)
-                                    
-                                    if network.stockResponse?.symbol == symbol {
-                                        Text("$\(network.stockResponse?.sortedTimeSeries.first?.data.close ?? "---")")
-                                            .font(.caption)
-                                            .foregroundColor(.cyan)
-                                    } else {
-                                        Text("Tap to load price")
-                                            .font(.caption)
-                                            .foregroundColor(.white.opacity(0.5))
-                                    }
-                                }
-                                Spacer()
-                                Image(systemName: "chart.line.uptrend.xyaxis")
-                                    .foregroundColor(.cyan)
-                            }
+                                    if let price = network.stockCache[symbol]?.sortedTimeSeries.first?.data.close {
+                                                   Text("$\(price)")
+                                                       .font(.caption)
+                                                       .foregroundColor(.cyan)
+                                               } else {
+                                                   Text("Loading...")
+                                                       .font(.caption)
+                                                       .foregroundColor(.white.opacity(0.4))
+                                               }
+                                           }
+                                           
+                                           Spacer()
+
+                                           if let stockData = network.stockCache[symbol] {
+                                               let chartValues = stockData.sortedTimeSeries.prefix(10)
+                                                   .compactMap { Double($0.data.close) }
+                                                   .reversed()
+                                               
+                                               GraphView(values: Array(chartValues))
+                                                   .frame(width: 80, height: 40) // Give it a fixed size in the row
+                                           }
+                                       }
                             .padding()
                             .background(Color.white.opacity(0.05))
                             .cornerRadius(18)
                             .onTapGesture {
-                                Task { await network.getStockDetail(symbol: symbol) }
+
                             }
                         }
                     }
@@ -52,6 +61,10 @@ struct PopularStocksView: View {
                 }
             }
         }
+        .task {
+                let popularSymbols = ["AAPL", "TSLA", "NVDA", "MSFT", "GOOGL"]
+                await network.getBatchStocks(symbols: popularSymbols)
+            }
     }
 }
             
