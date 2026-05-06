@@ -22,33 +22,22 @@ struct PopularStocksView: View {
                 ScrollView {
                     VStack(spacing: 16) {
                         ForEach(popularSymbols, id: \.self) { symbol in
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text(symbol)
-                                        .font(.headline)
-                                        .foregroundColor(.white)
-                                    if let price = network.stockCache[symbol]?.sortedTimeSeries.first?.data.close {
-                                                   Text("$\(price)")
-                                                       .font(.caption)
-                                                       .foregroundColor(.cyan)
-                                               } else {
-                                                   Text("Loading...")
-                                                       .font(.caption)
-                                                       .foregroundColor(.white.opacity(0.4))
-                                               }
-                                           }
-                                           
-                                           Spacer()
-
-                                           if let stockData = network.stockCache[symbol] {
-                                               let chartValues = stockData.sortedTimeSeries.prefix(10)
-                                                   .compactMap { Double($0.data.close) }
-                                                   .reversed()
-                                               
-                                               GraphView(values: Array(chartValues))
-                                                   .frame(width: 80, height: 40) // Give it a fixed size in the row
-                                           }
-                                       }
+                            if let data = network.findInMatrix(symbol: symbol) {
+                                NavigationLink(destination: StockDetailView(symbol: symbol, response: data)) {
+                                    HStack {
+                                        Text(symbol).font(.headline).foregroundColor(.white)
+                                        Spacer()
+                                        let prices = network.getPriceData(for: symbol, timeframe: "1W")
+                                        GraphView(values: prices)
+                                            .frame(width: 150, height: 50)
+                                    }
+                                    .padding()
+                                    .background(RoundedRectangle(cornerRadius: 15).fill(.white.opacity(0.05)))
+                                }
+                            } else {
+                                ProgressView().padding()
+                            }
+                        }
                             .padding()
                             .background(Color.white.opacity(0.05))
                             .cornerRadius(18)
@@ -60,7 +49,6 @@ struct PopularStocksView: View {
                     .padding()
                 }
             }
-        }
         .task {
                 let popularSymbols = ["AAPL", "TSLA", "NVDA", "MSFT", "GOOGL"]
                 await network.getBatchStocks(symbols: popularSymbols)
