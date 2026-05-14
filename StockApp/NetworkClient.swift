@@ -4,14 +4,14 @@ import UIKit
 import Combine
 
 @Observable
-class NetworkClient: ObservableObject {
+class NetworkClient {
     private(set) var stockResponse: AlphaVantageResponse?
     
-    // This is your live storage (a 2D array/matrix)
+
     var stockMatrix: [[AlphaVantageResponse]] = [[]]
     var myPortfolio: [String: Int] = [:]
 
-    // Helper to find a stock anywhere in your matrix
+
     func findInMatrix(symbol: String) -> AlphaVantageResponse? {
         return stockMatrix.flatMap { $0 }.first { $0.metaData.symbol == symbol }
     }
@@ -34,7 +34,7 @@ class NetworkClient: ObservableObject {
             let response = try decoder.decode(AlphaVantageResponse.self, from: data)
             
             await MainActor.run {
-                // Add the new response to the first row of your matrix
+
                 if self.stockMatrix.isEmpty { self.stockMatrix.append([]) }
                 self.stockMatrix[0].append(response)
                 self.stockResponse = response

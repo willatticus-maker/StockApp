@@ -18,20 +18,16 @@ struct StockDetailView: View {
             Color(red: 0.05, green: 0.06, blue: 0.1).ignoresSafeArea()
             
             VStack(spacing: 25) {
-                // Timeframe Picker
                 Picker("Timeframe", selection: $selectedTimeframe) {
                     ForEach(timeframes, id: \.self) { Text($0) }
                 }
                 .pickerStyle(.segmented)
                 .padding()
 
-                // High-Intensity Graph
                 GraphView(values: network.getPriceData(for: symbol, timeframe: selectedTimeframe))
                     .frame(height: 300)
-
                     .padding()
 
-                // Buy Button
                 Button(action: {
                     network.buyStock(symbol: symbol, quantity: 1)
                 }) {
@@ -45,7 +41,6 @@ struct StockDetailView: View {
                 }
                 .padding(.horizontal)
                 
-                // Show Current Holdings
                 Text("Owned: \(network.myPortfolio[symbol] ?? 0) shares")
                     .foregroundColor(.white.opacity(0.6))
                 
@@ -55,3 +50,5 @@ struct StockDetailView: View {
         .navigationTitle(symbol)
     }
 }
+
+
