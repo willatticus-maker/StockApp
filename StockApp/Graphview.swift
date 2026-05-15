@@ -1,17 +1,9 @@
-//
-//  Graphview.swift
-//  StockApp
-//
-//  Created by Kevin Berfirer on 4/29/26.
-//
-
 import SwiftUI
 
 struct GraphView: View {
     let values: [Double]
-    let dates: [String]          // e.g. ["2025-04-01", "2025-04-02", ...]
+    let dates: [String]
 
-    // Which index the user is currently scrubbing over (nil = no touch)
     @State private var scrubIndex: Int? = nil
 
     var body: some View {
@@ -21,36 +13,20 @@ struct GraphView: View {
             } else {
                 let maxValue = values.max() ?? 1
                 let minValue = values.min() ?? 0
-                let range    = maxValue - minValue == 0 ? 1 : maxValue - minValue
+                let range    = (maxValue - minValue == 0) ? 1 : (maxValue - minValue)
                 let width    = geometry.size.width
                 let height   = geometry.size.height
-
-                // Helper: converts a data index to an x position
-                func xPos(_ index: Int) -> CGFloat {
-                    let denom = max(values.count - 1, 1)
-                    return width * CGFloat(index) / CGFloat(denom)
-                }
-
-                // Helper: converts a price value to a y position
-                func yPos(_ value: Double) -> CGFloat {
-                    // Leave 30pt at top for the callout label, 20pt at bottom for x-axis labels
-                    let drawHeight = height - 50
-                    let topPad: CGFloat = 30
-                    return topPad + CGFloat(1 - (value - minValue) / range) * drawHeight
-                }
-
-                let isUp = (values.last ?? 0) >= (values.first ?? 0)
+                let isUp     = (values.last ?? 0) >= (values.first ?? 0)
                 let lineColor = isUp ? Color.green : Color.red
 
                 ZStack(alignment: .topLeading) {
-
-                    // ── Gradient fill under the line ─────────────────────
+                    // ── Gradient fill
                     Path { path in
-                        path.move(to: CGPoint(x: 0, y: yPos(values[0])))
+                        path.move(to: CGPoint(x: 0, y: yPos(values[0], height: height, min: minValue, range: range)))
                         for i in values.indices {
-                            path.addLine(to: CGPoint(x: xPos(i), y: yPos(values[i])))
+                            path.addLine(to: CGPoint(x: xPos(i, width: width), y: yPos(values[i], height: height, min: minValue, range: range)))
                         }
-                        path.addLine(to: CGPoint(x: xPos(values.count - 1), y: height - 20))
+                        path.addLine(to: CGPoint(x: xPos(values.count - 1, width: width), y: height - 20))
                         path.addLine(to: CGPoint(x: 0, y: height - 20))
                         path.closeSubpath()
                     }
@@ -62,24 +38,24 @@ struct GraphView: View {
                         )
                     )
 
-                    // ── Main price line ───────────────────────────────────
+                    // ── Main price line
                     Path { path in
-                        path.move(to: CGPoint(x: 0, y: yPos(values[0])))
+                        path.move(to: CGPoint(x: 0, y: yPos(values[0], height: height, min: minValue, range: range)))
                         for i in values.indices {
-                            path.addLine(to: CGPoint(x: xPos(i), y: yPos(values[i])))
+                            path.addLine(to: CGPoint(x: xPos(i, width: width), y: yPos(values[i], height: height, min: minValue, range: range)))
                         }
                     }
                     .stroke(lineColor, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
 
-                    // ── Y-axis labels (min / mid / max) ───────────────────
+                    // ── Y-axis labels
                     let midValue = (maxValue + minValue) / 2
                     Group {
-                        priceLabel("$\(formatPrice(maxValue))", y: yPos(maxValue) - 8)
-                        priceLabel("$\(formatPrice(midValue))", y: yPos(midValue) - 8)
-                        priceLabel("$\(formatPrice(minValue))", y: yPos(minValue) - 8)
+                        priceLabel("$\(formatPrice(maxValue))", y: yPos(maxValue, height: height, min: minValue, range: range) - 8)
+                        priceLabel("$\(formatPrice(midValue))", y: yPos(midValue, height: height, min: minValue, range: range) - 8)
+                        priceLabel("$\(formatPrice(minValue))", y: yPos(minValue, height: height, min: minValue, range: range) - 8)
                     }
 
-                    // ── X-axis date labels ────────────────────────────────
+                    // ── X-axis date labels
                     if !dates.isEmpty {
                         Group {
                             Text(shortDate(dates.first ?? ""))
@@ -94,19 +70,17 @@ struct GraphView: View {
                         }
                     }
 
-                    // ── Scrubber (shown when dragging) ────────────────────
+                    // ── Scrubber
                     if let idx = scrubIndex, idx < values.count {
-                        let scrubX = xPos(idx)
-                        let scrubY = yPos(values[idx])
+                        let scrubX = xPos(idx, width: width)
+                        let scrubY = yPos(values[idx], height: height, min: minValue, range: range)
 
-                        // Vertical line
                         Path { path in
                             path.move(to: CGPoint(x: scrubX, y: 28))
                             path.addLine(to: CGPoint(x: scrubX, y: height - 20))
                         }
                         .stroke(Color.white.opacity(0.4), style: StrokeStyle(lineWidth: 1, dash: [4]))
 
-                        // Dot on the line
                         Circle()
                             .fill(lineColor)
                             .frame(width: 10, height: 10)
@@ -117,7 +91,6 @@ struct GraphView: View {
                             .frame(width: 10, height: 10)
                             .position(x: scrubX, y: scrubY)
 
-                        // Price callout bubble
                         let price = values[idx]
                         let label = "$\(formatPrice(price))"
                         let dateLabel = idx < dates.count ? shortDate(dates[idx]) : ""
@@ -126,10 +99,6 @@ struct GraphView: View {
                         ZStack {
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color.white.opacity(0.15))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                                )
                             VStack(spacing: 1) {
                                 Text(label)
                                     .font(.system(size: 13, weight: .bold, design: .rounded))
@@ -145,7 +114,7 @@ struct GraphView: View {
                         .position(x: bubbleX, y: 14)
                     }
                 }
-                // ── Drag gesture to scrub ─────────────────────────────────
+                .contentShape(Rectangle())
                 .gesture(
                     DragGesture(minimumDistance: 0)
                         .onChanged { value in
@@ -161,12 +130,23 @@ struct GraphView: View {
         }
     }
 
-    // Compact price: 183.42 → "183.42", no extra decimals
+    // MARK: - Private Helpers
+
+    private func xPos(_ index: Int, width: CGFloat) -> CGFloat {
+        let denom = max(values.count - 1, 1)
+        return width * CGFloat(index) / CGFloat(denom)
+    }
+
+    private func yPos(_ value: Double, height: CGFloat, min: Double, range: Double) -> CGFloat {
+        let drawHeight = height - 50
+        let topPad: CGFloat = 30
+        return topPad + CGFloat(1 - (value - min) / range) * drawHeight
+    }
+
     private func formatPrice(_ value: Double) -> String {
         String(format: value >= 1000 ? "%.0f" : "%.2f", value)
     }
 
-    // "2025-04-01" → "Apr 1"
     private func shortDate(_ raw: String) -> String {
         let parts = raw.split(separator: "-")
         guard parts.count == 3,
@@ -181,6 +161,6 @@ struct GraphView: View {
         Text(text)
             .font(.system(size: 10))
             .foregroundColor(.white.opacity(0.4))
-            .position(x: 26, y: y)
+            .position(x: 35, y: y)
     }
 }
