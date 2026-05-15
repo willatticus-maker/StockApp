@@ -9,6 +9,7 @@ import SwiftUI
 
 struct StockDetailView: View {
     @Environment(NetworkClient.self) private var network
+    @Environment(PortfolioStore.self) private var portfolioStore
     let symbol: String
     @State private var selectedTimeframe = "1M"
     let timeframes = ["1W", "1M", "YTD", "1Y"]
@@ -29,7 +30,15 @@ struct StockDetailView: View {
                     .padding()
 
                 Button(action: {
-                    network.buyStock(symbol: symbol, quantity: 1)
+                    let prices = network.getPriceData(for: symbol, timeframe: selectedTimeframe)
+                    
+                    if let latestPrice = network.getPriceData(for: symbol, timeframe: selectedTimeframe).last {
+                        portfolioStore.buyStock(
+                            symbol: symbol,
+                            shares: 1,
+                            price: latestPrice
+                        )
+                    }
                 }) {
                     Text("BUY 1 SHARE OF \(symbol)")
                         .font(.headline)
@@ -41,7 +50,7 @@ struct StockDetailView: View {
                 }
                 .padding(.horizontal)
                 
-                Text("Owned: \(network.myPortfolio[symbol] ?? 0) shares")
+                Text("Owned: \(portfolioStore.sharesOwned(for: symbol), specifier: "%.2f") shares")
                     .foregroundColor(.white.opacity(0.6))
                 
                 Spacer()
