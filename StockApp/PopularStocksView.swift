@@ -33,7 +33,7 @@ struct PopularStocksView: View {
                                             Text(symbol).font(.headline).foregroundColor(.white)
                                             Spacer()
                                             let prices = network.getPriceData(for: symbol, timeframe: "1W")
-                                            GraphView(values: prices, dates: [])
+                                            GraphView(values: prices, dates: [], isSimplified: true)
                                                 .frame(width: 150, height: 50)
                                         }
                                     }

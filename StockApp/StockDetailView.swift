@@ -54,7 +54,7 @@ struct StockDetailView: View {
                     // ── Price Header ──────────────────────────────────────
                     VStack(spacing: 6) {
                         if let price = currentPrice {
-                            Text("$\(price, specifier: "%.2f")")
+                            Text("$\(price, specifier: "%.2f") 1 day")
                                 .font(.system(size: 44, weight: .bold, design: .rounded))
                                 .foregroundColor(.white)
                         } else {
