@@ -27,24 +27,13 @@ struct PopularStocksView: View {
                     ScrollView {
                         VStack(spacing: 16) {
                             ForEach(popularSymbols, id: \.self) { symbol in
-                                NavigationLink(destination: StockDetailView(symbol: symbol)) {
-                                    HStack {
-                                        Text(symbol)
-                                            .font(.headline)
-                                            .foregroundColor(.white)
-
-                                        Spacer()
-
-                                        let prices = network.getPriceData(
-                                            for: symbol,
-                                            timeframe: "1W"
-                                        )
-
-                                        if prices.isEmpty {
-                                            ProgressView()
-                                                .tint(.white)
-                                        } else {
-                                            GraphView(values: prices)
+                                if let _ = network.findInMatrix(symbol: symbol) {
+                                    NavigationLink(destination: StockDetailView(symbol: symbol)) {
+                                        HStack {
+                                            Text(symbol).font(.headline).foregroundColor(.white)
+                                            Spacer()
+                                            let prices = network.getPriceData(for: symbol, timeframe: "1W")
+                                            GraphView(values: prices, dates: [])
                                                 .frame(width: 150, height: 50)
                                         }
                                     }
